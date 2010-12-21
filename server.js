@@ -1,40 +1,55 @@
-var http = require('http'),
-    sys  = require('sys'),
-    fs   = require('fs'),
-    io   = require('socket.io');
-var Connect = require('connect');
+var http = require('http')
+, url = require('url')
+, fs = require('fs')
+, io = require('socket.io')
+, sys = require('sys')
+, Connect = require('connect')
+, server;
+
+
 var server = Connect.createServer(
-    Connect.logger(),
-    Connect.conditionalGet(),
-    Connect.cache(),
+    Connect.logger(), 
+    Connect.conditionalGet(), 
+    Connect.cache(), 
     Connect.gzip(),
-    Connect.staticProvider(__dirname)
+    Connect.staticProvider(__dirname) 
 );
 
-var socket = io.listen(server);
+server.listen(8080);
 
-socket.on('connection', function(client) {
+var io = io.listen(server)
+, buffer = [];
 
+io.on('connection', function(client){
     var user;
 
-    client.on('message', function(message) {
+    client.send({ buffer: buffer });
+    client.broadcast({ announcement: client.sessionId + ' connected' });
 
-        if(!user) {
+    client.on('message', function(message){
+
+        if (!user) {
             user = message;
-            client.send({ message: 'Welcome, ' + user.nickname + '!', nickname: 'server', gravatar: '' });
+            /*
+            var msg = { message: [client.sessionId, user + 'さん！いらっしゃい。', user] };
+            buffer.push(msg);
+            if (buffer.length > 15) {
+                buffer.shift();
+            }
+            client.broadcast(msg);
+            */
+
             return;
         }
 
-        var response = {
-            'nickname': user.nickname,
-            'gravatar': user.gravatar,
-            'message': message.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-        };
-
-        socket.broadcast(response);
+        var msg = { message: [client.sessionId, message, user] };
+        buffer.push(msg);
+        if (buffer.length > 15) buffer.shift();
+            client.broadcast(msg);
     });
 
+    client.on('disconnect', function(){
+        client.broadcast({ announcement: client.sessionId + ' disconnected' });
+    });
 });
-
-server.listen(4000);
 

@@ -1,13 +1,13 @@
 
 Ext.ns('Ext.ux', 'Ext.ux.util');
 
-Ext.ux.util.Socketio = Ext.extend(Ext.util.Observable, {
+Ext.ux.util.SocketIO = Ext.extend(Ext.util.Observable, {
 
     constructor: function(host, options){
 
         options = options || {};
 
-        Ext.ux.util.Socketio.superclass.constructor.call(
+        Ext.ux.util.SocketIO.superclass.constructor.call(
             this
         );
 
