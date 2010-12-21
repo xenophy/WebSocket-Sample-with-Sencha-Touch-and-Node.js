@@ -30,15 +30,6 @@ io.on('connection', function(client){
 
         if (!user) {
             user = message;
-            /*
-            var msg = { message: [client.sessionId, user + 'さん！いらっしゃい。', user] };
-            buffer.push(msg);
-            if (buffer.length > 15) {
-                buffer.shift();
-            }
-            client.broadcast(msg);
-            */
-
             return;
         }
 
